@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Akademski radar</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#183e63">
+<meta name="apple-mobile-web-app-title" content="Radar">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+:root{--bg:#183e63;--ink:#ffffff;--muted:#c9d9ea;--accent:#e2a85e}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px}
+main{max-width:420px;width:100%;display:grid;gap:18px;justify-items:center;text-align:center}
+img{width:112px;height:112px;border-radius:26px}
+h1{margin:0;font-size:26px;font-weight:600}
+p{margin:0;color:var(--muted);line-height:1.5;font-size:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:10px 22px;border-radius:12px;font:inherit;font-size:17px;font-weight:600;text-decoration:none;cursor:pointer;border:0}
+.primary{background:var(--accent);color:#1d1406}
+.ghost{background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,.4)}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.steps{text-align:left;background:rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;font-size:15px;color:var(--muted);line-height:1.55}
+.steps b{color:var(--ink)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <img src="icon-192.png" alt="">
+  <h1>Akademski radar</h1>
+
+  <section id="launching" hidden>
+    <p>Otvaram Akademski radar…</p>
+  </section>
+
+  <section id="setup" style="display:grid;gap:16px;justify-items:center">
+    <p>Ovo je pokretač za tvoj Akademski radar. Instaliraj ga i dobićeš ikonicu koja otvara aplikaciju.</p>
+    <button id="install" class="btn primary" type="button" hidden>Instaliraj</button>
+    <div class="steps" id="manual">
+      <b>Telefon (Android, Chrome):</b> meni ⋮ gore desno → <b>Instaliraj aplikaciju</b> (ili <b>Add to Home screen → Install</b>).<br>
+      <b>Kompjuter (Chrome ili Edge):</b> ikonica za instalaciju na desnom kraju adresne trake, ili meni → <b>Apps → Install</b>.
+    </div>
+    <a id="open" class="btn ghost" href="https://claude.ai/artifact/MkqmLRBwpPfeSkJewMMaiQ">Otvori Akademski radar</a>
+  </section>
+</main>
+<script>
+(function(){
+  var TARGET = "https://claude.ai/artifact/MkqmLRBwpPfeSkJewMMaiQ";
+  var params = new URLSearchParams(location.search);
+  var standalone = params.get("app") === "1" ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+    window.navigator.standalone === true;
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  }
+
+  if (standalone) {
+    document.getElementById("setup").hidden = true;
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("launching").hidden = false;
+    location.replace(TARGET);
+    return;
+  }
+
+  var deferred = null;
+  var btn = document.getElementById("install");
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferred = e;
+    btn.hidden = false;
+  });
+  btn.addEventListener("click", function(){
+    if (!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.finally(function(){ deferred = null; btn.hidden = true; });
+  });
+  window.addEventListener("appinstalled", function(){
+    btn.hidden = true;
+    document.getElementById("manual").innerHTML = "<b>Instalirano.</b> Ikonica „Akademski radar” je sada na početnom ekranu ili u listi aplikacija.";
+  });
+})();
+</script>
+</body>
+</html>
